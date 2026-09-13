@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CivicLens Kerala — Evidence-Backed Civic Information</title>
+  <meta name="description" content="Evidence-backed information about Kerala's constituencies, public money, projects and civic issues." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LIVE TICKER -->
+<div class="civic-ticker" id="civicTicker">
+  <span class="ticker-label">KERALA UPDATES</span>
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- DEMO BANNER -->
+<div class="demo-banner" id="demoBanner">
+  <span class="demo-icon">⚠</span>
+  <strong>Prototype — Kerala Research Dataset.</strong> Information is presented according to available source evidence. Missing or disputed information is marked accordingly. This is not an official government portal.
+  <button class="demo-close" onclick="document.getElementById('demoBanner').style.display='none'" aria-label="Close">×</button>
+</div>
+
+<!-- HEADER / NAV -->
+<header class="site-header" id="siteHeader">
+  <nav class="nav-container" role="navigation" aria-label="Main navigation">
+    <div class="nav-logo">
+      <a href="#home" class="logo-link" onclick="showSection('home')">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect width="28" height="28" rx="6" fill="#1B6FEB"/>
+          <path d="M7 14C7 10.134 10.134 7 14 7s7 3.134 7 7-3.134 7-7 7-7-3.134-7-7z" fill="none" stroke="white" stroke-width="2"/>
+          <path d="M14 10v4l3 2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="14" cy="14" r="1.5" fill="white"/>
+        </svg>
+        <span class="logo-text">CivicLens <span class="logo-kerala">Kerala</span></span>
+      </a>
+    </div>
+
+    <ul class="nav-links" id="navLinks" role="list">
+      <li><a href="#" class="nav-link active" data-section="home" onclick="showSection('home')">Home</a></li>
+      <li><a href="#" class="nav-link" data-section="constituencies" onclick="showSection('constituencies')">Constituencies</a></li>
+      <li><a href="#" class="nav-link" data-section="representatives" onclick="showSection('representatives')">Representatives</a></li>
+      <li><a href="#" class="nav-link" data-section="money" onclick="showSection('money')">Money</a></li>
+      <li><a href="#" class="nav-link" data-section="projects" onclick="showSection('projects')">Projects</a></li>
+      <li><a href="#" class="nav-link" data-section="problems" onclick="showSection('problems')">Problems</a></li>
+      <li><a href="#" class="nav-link" data-section="compare" onclick="showSection('compare')">Compare</a></li>
+      <li><a href="#" class="nav-link" data-section="sources" onclick="showSection('sources')">Sources</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="icon-btn search-trigger" id="searchTrigger" aria-label="Open search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <span class="lang-sep">|</span>
+        <button class="lang-btn" data-lang="ml" onclick="setLanguage('ml')">മ</button>
+      </div>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Global Search Overlay -->
+  <div class="search-overlay" id="searchOverlay" role="search" aria-label="Global search">
+    <div class="search-overlay-inner">
+      <div class="search-input-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search constituency, MLA, project, problem or location in Kerala…" autocomplete="off" />
+        <button class="close-search" onclick="closeSearch()" aria-label="Close search">×</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+      <div class="search-suggestions">
+        <span class="suggestion-label">Try:</span>
+        <button class="suggestion-chip" onclick="runSearch('Ernakulam')">Ernakulam</button>
+        <button class="suggestion-chip" onclick="runSearch('Kozhikode North')">Kozhikode North</button>
+        <button class="suggestion-chip" onclick="runSearch('C. P. John')">C. P. John</button>
+        <button class="suggestion-chip" onclick="runSearch('PRISM')">PRISM</button>
+        <button class="suggestion-chip" onclick="runSearch('water')">Water</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="mainContent">
+
+<!-- ==================== HOME ==================== -->
+<section class="page-section active" id="section-home">
+
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot-pulse"></span>
+        <span>Kerala Civic Information Platform</span>
+      </div>
+      <h1 class="hero-heading">Understand Kerala.<br>Follow the money.<br>See what gets built.</h1>
+      <p class="hero-sub">Evidence-backed information about Kerala's constituencies, public money, projects and civic issues. Every figure is linked to a source. Missing data is marked — not hidden.</p>
+
+      <div class="hero-search-box">
+        <svg class="hs-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="heroSearch" placeholder="Search a Kerala constituency, MLA, MP, project or civic issue…" autocomplete="off" />
+        <button class="hero-search-btn" onclick="heroSearchSubmit()">Search</button>
+        <div class="hero-dropdown" id="heroDropdown"></div>
+      </div>
+
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="showSection('constituencies')">Explore Constituencies</button>
+        <button class="btn-secondary" onclick="showSection('money')">Explore Public Money</button>
+      </div>
+
+      <div class="hero-stats" id="heroStats">
+        <div class="hero-stat">
+          <span class="hs-num" id="stat-districts">14</span>
+          <span class="hs-label">Kerala Districts</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hs-num" id="stat-const">3</span>
+          <span class="hs-label">Detailed Constituencies</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hs-num" id="stat-projects">0</span>
+          <span class="hs-label">Project Records</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hs-num" id="stat-problems">0</span>
+          <span class="hs-label">Civic Issues</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED CONSTITUENCIES -->
+  <div class="section-block">
+    <div class="section-header">
+      <div>
+        <h2>Featured Constituencies</h2>
+        <p class="section-sub">Three constituencies with research-backed data. Additional constituencies will be added as data is verified.</p>
+      </div>
+    </div>
+    <div class="featured-const-grid" id="featuredConstGrid"></div>
+  </div>
+
+  <!-- KERALA DISTRICT MAP -->
+  <div class="section-block alt-bg">
+    <div class="section-header">
+      <div>
+        <h2>Explore Kerala by District</h2>
+        <p class="section-sub">Kerala → District → Assembly Constituency. Click a district to see available constituencies.</p>
+      </div>
+    </div>
+    <div class="kerala-map-layout">
+      <div class="kerala-districts-grid" id="keralaDistrictsGrid"></div>
+      <div class="kerala-map-sidebar" id="keralaMapSidebar">
+        <div class="map-preview-card" id="keralaPreviewCard">
+          <div class="mpc-header">
+            <span class="mpc-badge">Kerala</span>
+            <span class="mpc-type">Select a district</span>
+          </div>
+          <h3 class="mpc-name">14 Districts</h3>
+          <p class="mpc-rep">140 Assembly Constituencies</p>
+          <div class="mpc-stats">
+            <div class="mpc-stat"><span class="mpc-val">3</span><span class="mpc-key">With Data</span></div>
+            <div class="mpc-stat"><span class="mpc-val">137</span><span class="mpc-key">Coming Soon</span></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Click a district card to explore constituencies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KERALA DATA COVERAGE -->
+  <div class="section-block">
+    <div class="section-header">
+      <div>
+        <h2>Kerala Data Coverage</h2>
+        <p class="section-sub">Transparency about what is available and what is still being verified.</p>
+      </div>
+    </div>
+    <div class="coverage-grid" id="coverageGrid"></div>
+  </div>
+
+  <!-- LATEST RECORDS -->
+  <div class="section-block alt-bg">
+    <div class="section-header">
+      <div>
+        <h2>Latest Records</h2>
+        <p class="section-sub">Recently documented entries with source references.</p>
+      </div>
+    </div>
+    <div class="latest-records-grid" id="latestRecords"></div>
+  </div>
+
+</section>
+
+<!-- ==================== CONSTITUENCIES ==================== -->
+<section class="page-section" id="section-constituencies">
+  <div class="section-hero mini-hero">
+    <h1>Kerala Constituencies</h1>
+    <p>Research-backed constituency data. India → Kerala → District → Constituency.</p>
+    <div class="const-nav-row">
+      <select id="constDistrictFilter" onchange="filterConstByDistrict(this.value)" aria-label="Filter by district">
+        <option value="">All Districts</option>
+        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+        <option value="Ernakulam">Ernakulam</option>
+        <option value="Kozhikode">Kozhikode</option>
+      </select>
+      <select id="constSelector" onchange="loadConstituency(this.value)" aria-label="Select constituency" class="const-select">
+        <option value="">Select a constituency…</option>
+        <option value="thiruvananthapuram">Thiruvananthapuram (LAC 134)</option>
+        <option value="ernakulam">Ernakulam (LAC 82)</option>
+        <option value="kozhikode-north">Kozhikode North (LAC 27)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-block" id="constDirectoryBlock">
+    <div id="constDirectory"></div>
+  </div>
+
+  <div id="constDashboardBlock" style="display:none">
+    <div class="section-block">
+      <button class="back-btn" onclick="showConstDirectory()">← Back to Directory</button>
+      <div id="constDashboard"></div>
+    </div>
+
+    <!-- WHAT WE KNOW / DON'T KNOW -->
+    <div class="section-block alt-bg">
+      <div id="whatWeKnow"></div>
+    </div>
+
+    <!-- DATA QUALITY -->
+    <div class="section-block">
+      <div id="dataQuality"></div>
+    </div>
+
+    <!-- ASK -->
+    <div class="section-block alt-bg">
+      <div class="section-header"><div><h2>Ask About This Constituency</h2><p class="section-sub">Find information from the research dataset.</p></div></div>
+      <div class="ask-box">
+        <div class="ask-input-wrap">
+          <input type="text" id="askInput" placeholder="e.g. Who is the current MLA? What projects are ongoing?" />
+          <button class="btn-primary" onclick="askConstituency()">Ask</button>
+        </div>
+        <div class="ask-chips">
+          <button class="chip" onclick="askPreset('Who is the current MLA?')">Who is the current MLA?</button>
+          <button class="chip" onclick="askPreset('What projects are documented?')">What projects are documented?</button>
+          <button class="chip" onclick="askPreset('What are the civic problems?')">What are the civic problems?</button>
+          <button class="chip" onclick="askPreset('What is the voter turnout?')">What is the voter turnout?</button>
+        </div>
+        <div class="ask-answer" id="askAnswer"><em style="color:var(--text-muted);">Ask a question above to search the research dataset.</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== REPRESENTATIVES ==================== -->
+<section class="page-section" id="section-representatives">
+  <div class="section-hero mini-hero">
+    <h1>Representatives</h1>
+    <p>Kerala MLAs with documented term histories. Factual records only — no political scoring.</p>
+    <div class="rep-search-bar">
+      <input type="text" id="repSearch" placeholder="Search by name, constituency, party…" oninput="filterRepresentatives()" />
+      <select id="repConstFilter" onchange="filterRepresentatives()">
+        <option value="">All Constituencies</option>
+        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+        <option value="Ernakulam">Ernakulam</option>
+        <option value="Kozhikode North">Kozhikode North</option>
+      </select>
+    </div>
+  </div>
+  <div class="section-block">
+    <div class="rep-grid" id="repGrid"></div>
+  </div>
+  <div class="rep-profile-panel" id="repProfilePanel" style="display:none">
+    <div class="section-block">
+      <button class="back-btn" onclick="closeRepProfile()">← Back to Representatives</button>
+      <div class="rep-profile-content" id="repProfileContent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MONEY ==================== -->
+<section class="page-section" id="section-money">
+  <div class="section-hero mini-hero">
+    <h1>Public Money</h1>
+    <p>Documented fund flows for Kerala constituencies. Sanction ≠ Release ≠ Expenditure.</p>
+  </div>
+
+  <div class="section-block">
+    <div class="sanction-note">
+      <span class="sn-icon">ℹ</span>
+      <div>
+        <strong>Important distinction:</strong> Administrative Sanction ≠ Technical Sanction ≠ Amount Released ≠ Bills Paid ≠ Actual Expenditure. Each stage represents a different point in the fund-flow process. Where a value is not verified, it is shown as <strong>Not verified</strong> — not as ₹0.
+      </div>
+    </div>
+    <div class="money-kpi-row" id="moneyKpiRow"></div>
+  </div>
+
+  <div class="section-block alt-bg">
+    <div class="section-header"><div><h2>Follow the Money</h2><p class="section-sub">Trace public funds from government allocation to on-the-ground implementation. Click any stage to view details.</p></div></div>
+    <div class="ftm-container" id="ftmContainer"></div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-header"><div><h2>NGO / CSR Tracker</h2><p class="section-sub">Documented non-government and corporate development spending in Kerala constituencies.</p></div></div>
+    <div class="ngo-filters">
+      <button class="filter-chip active" onclick="filterNGO('all',this)">All</button>
+      <button class="filter-chip" onclick="filterNGO('NGO',this)">NGO</button>
+      <button class="filter-chip" onclick="filterNGO('CSR',this)">CSR</button>
+      <button class="filter-chip" onclick="filterNGO('Government',this)">Government</button>
+    </div>
+    <div class="ngo-grid" id="ngoGrid"></div>
+  </div>
+</section>
+
+<!-- ==================== PROJECTS ==================== -->
+<section class="page-section" id="section-projects">
+  <div class="section-hero mini-hero">
+    <h1>Project Database</h1>
+    <p>Documented public development projects in Kerala. Construction status and operational outcome are tracked separately.</p>
+  </div>
+  <div class="section-block">
+    <div class="project-toolbar">
+      <div class="project-search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="projectSearch" placeholder="Search projects…" oninput="filterProjects()" />
+      </div>
+      <div class="project-filters">
+        <select id="statusFilter" onchange="filterProjects()">
+          <option value="">All Status</option>
+          <option value="Completed">Completed</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Delayed">Delayed</option>
+          <option value="Sanctioned">Sanctioned</option>
+          <option value="Tendered">Tendered</option>
+        </select>
+        <select id="constFilter" onchange="filterProjects()">
+          <option value="">All Constituencies</option>
+          <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+          <option value="Ernakulam">Ernakulam</option>
+          <option value="Kozhikode North">Kozhikode North</option>
+        </select>
+        <select id="deptFilter" onchange="filterProjects()">
+          <option value="">All Departments</option>
+          <option value="KWA">KWA</option>
+          <option value="PWD">PWD</option>
+          <option value="AMRUT">AMRUT</option>
+          <option value="Smart City">Smart City</option>
+          <option value="MLA-SDF">MLA-SDF</option>
+          <option value="LAC-ADS">LAC-ADS</option>
+          <option value="PRISM">PRISM</option>
+        </select>
+        <select id="sortProjects" onchange="filterProjects()">
+          <option value="name">Sort: Name</option>
+          <option value="const">By Constituency</option>
+        </select>
+      </div>
+    </div>
+    <div class="status-tabs">
+      <button class="status-tab active" data-status="" onclick="setStatusTab('',this)">All</button>
+      <button class="status-tab completed" data-status="Completed" onclick="setStatusTab('Completed',this)">Completed</button>
+      <button class="status-tab ongoing" data-status="Ongoing" onclick="setStatusTab('Ongoing',this)">Ongoing</button>
+      <button class="status-tab delayed" data-status="Delayed" onclick="setStatusTab('Delayed',this)">Delayed</button>
+      <button class="status-tab proposed" data-status="Sanctioned" onclick="setStatusTab('Sanctioned',this)">Sanctioned</button>
+    </div>
+    <div class="projects-grid" id="projectsGrid"></div>
+  </div>
+</section>
+
+<!-- ==================== PROBLEMS ==================== -->
+<section class="page-section" id="section-problems">
+  <div class="section-hero mini-hero">
+    <h1>Civic Problems</h1>
+    <p>Documented civic issues in Kerala constituencies. Reported concerns are clearly distinguished from verified established facts.</p>
+  </div>
+  <div class="section-block">
+    <div class="problem-category-tabs">
+      <button class="pcat-tab active" onclick="filterProblems('all',this)">All</button>
+      <button class="pcat-tab" onclick="filterProblems('Water',this)">💧 Water</button>
+      <button class="pcat-tab" onclick="filterProblems('Waste',this)">♻ Waste</button>
+      <button class="pcat-tab" onclick="filterProblems('Roads',this)">🛣 Roads</button>
+      <button class="pcat-tab" onclick="filterProblems('Healthcare',this)">🏥 Healthcare</button>
+      <button class="pcat-tab" onclick="filterProblems('Infrastructure',this)">🏗 Infrastructure</button>
+      <button class="pcat-tab" onclick="filterProblems('Environment',this)">🌿 Environment</button>
+    </div>
+    <div class="problems-grid" id="problemsGrid"></div>
+  </div>
+</section>
+
+<!-- ==================== COMPARE ==================== -->
+<section class="page-section" id="section-compare">
+  <div class="section-hero mini-hero">
+    <h1>Compare</h1>
+    <p>Place constituencies or representatives side by side using documented factual data. No political scoring.</p>
+  </div>
+  <div class="section-block">
+    <div class="compare-tabs">
+      <button class="compare-tab active" onclick="setCompareTab('constituencies',this)">Constituencies</button>
+      <button class="compare-tab" onclick="setCompareTab('representatives',this)">Representatives</button>
+    </div>
+
+    <div id="compareConstPanel">
+      <div class="compare-selectors">
+        <select id="cmp1" onchange="renderComparison()" aria-label="First constituency">
+          <option value="thiruvananthapuram">Thiruvananthapuram</option>
+          <option value="ernakulam">Ernakulam</option>
+          <option value="kozhikode-north">Kozhikode North</option>
+        </select>
+        <span class="vs-badge">vs</span>
+        <select id="cmp2" onchange="renderComparison()" aria-label="Second constituency">
+          <option value="ernakulam">Ernakulam</option>
+          <option value="thiruvananthapuram">Thiruvananthapuram</option>
+          <option value="kozhikode-north">Kozhikode North</option>
+        </select>
+        <span class="vs-badge">vs</span>
+        <select id="cmp3" onchange="renderComparison()" aria-label="Third constituency (optional)">
+          <option value="">None</option>
+          <option value="kozhikode-north">Kozhikode North</option>
+          <option value="thiruvananthapuram">Thiruvananthapuram</option>
+          <option value="ernakulam">Ernakulam</option>
+        </select>
+      </div>
+      <div class="comparison-table-wrap" id="comparisonTableWrap"></div>
+    </div>
+
+    <div id="compareRepPanel" style="display:none">
+      <div class="compare-selectors">
+        <select id="repCmp1" onchange="renderRepComparison()" aria-label="First representative">
+          <option value="0">C. P. John (Thiruvananthapuram)</option>
+          <option value="1">T. J. Vinod (Ernakulam)</option>
+          <option value="2">Adv. K. Jayanth (Kozhikode North)</option>
+        </select>
+        <span class="vs-badge">vs</span>
+        <select id="repCmp2" onchange="renderRepComparison()" aria-label="Second representative">
+          <option value="1">T. J. Vinod (Ernakulam)</option>
+          <option value="0">C. P. John (Thiruvananthapuram)</option>
+          <option value="2">Adv. K. Jayanth (Kozhikode North)</option>
+        </select>
+      </div>
+      <div id="repComparisonContent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SOURCES ==================== -->
+<section class="page-section" id="section-sources">
+  <div class="section-hero mini-hero">
+    <h1>Sources &amp; Evidence</h1>
+    <p>Every figure on CivicLens Kerala is linked to a documented source. Browse the evidence index.</p>
+  </div>
+  <div class="section-block">
+    <div class="source-filters">
+      <button class="filter-chip active" onclick="filterSources('all',this)">All</button>
+      <button class="filter-chip" onclick="filterSources('Official',this)">Official</button>
+      <button class="filter-chip" onclick="filterSources('Government Record',this)">Government Record</button>
+      <button class="filter-chip" onclick="filterSources('Audit',this)">Audit</button>
+      <button class="filter-chip" onclick="filterSources('RTI',this)">RTI</button>
+      <button class="filter-chip" onclick="filterSources('Secondary Report',this)">Secondary Report</button>
+    </div>
+    <div class="sources-grid" id="sourcesGrid"></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="logo-link" onclick="showSection('home')">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect width="28" height="28" rx="6" fill="#1B6FEB"/>
+          <path d="M7 14C7 10.134 10.134 7 14 7s7 3.134 7 7-3.134 7-7 7-7-3.134-7-7z" fill="none" stroke="white" stroke-width="2"/>
+          <circle cx="14" cy="14" r="1.5" fill="white"/>
+        </svg>
+        <span class="logo-text">CivicLens Kerala</span>
+      </a>
+      <p class="footer-tagline">Evidence-backed civic information for Kerala.</p>
+      <p class="footer-disclaimer">CivicLens presents public information from documented sources. It does not provide political endorsements, rankings or unsupported allegations. Prototype using research-backed constituency records.</p>
+    </div>
+    <div class="footer-links-grid">
+      <div class="footer-col">
+        <h4>Kerala</h4>
+        <ul>
+          <li><a href="#" onclick="showSection('constituencies')">Constituencies</a></li>
+          <li><a href="#" onclick="showSection('representatives')">Representatives</a></li>
+          <li><a href="#" onclick="showSection('projects')">Projects</a></li>
+          <li><a href="#" onclick="showSection('money')">Public Money</a></li>
+          <li><a href="#" onclick="showSection('problems')">Civic Problems</a></li>
+          <li><a href="#" onclick="showSection('sources')">Sources</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>About</h4>
+        <ul>
+          <li><a href="#">About CivicLens</a></li>
+          <li><a href="#">Methodology</a></li>
+          <li><a href="#">Data Sources</a></li>
+          <li><a href="#">Transparency</a></li>
+          <li><a href="#" onclick="openGlossary()">Glossary</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="#" onclick="showSection('compare')">Compare Constituencies</a></li>
+          <li><a href="#" onclick="showSection('compare')">Compare Representatives</a></li>
+          <li><a href="#" onclick="openRTI()">RTI Draft Helper</a></li>
+          <li><a href="#">Data Methodology</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Prototype — Kerala Research Dataset · Last updated: June 2025</span>
+    <span>Information is presented according to available source evidence. Missing or disputed information is marked accordingly.</span>
+  </div>
+</footer>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Source Viewer -->
+<div class="modal-overlay" id="sourceModal" onclick="closeSourceModal(event)" role="dialog" aria-modal="true" aria-labelledby="sourceModalTitle">
+  <div class="modal source-modal">
+    <div class="modal-header">
+      <div><span class="source-verified-badge">📋 Evidence Record</span><h2 id="sourceModalTitle">Source Information</h2></div>
+      <button class="modal-close" onclick="closeSourceModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="sourceModalBody"></div>
+  </div>
+</div>
+
+<!-- Project Detail -->
+<div class="modal-overlay" id="projectModal" onclick="closeProjectModal(event)" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+  <div class="modal project-modal">
+    <div class="modal-header">
+      <h2 id="projectModalTitle">Project Details</h2>
+      <button class="modal-close" onclick="closeProjectModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="projectModalBody"></div>
+  </div>
+</div>
+
+<!-- AI Explain -->
+<div class="modal-overlay" id="explainModal" onclick="closeExplainModal(event)" role="dialog" aria-modal="true" aria-labelledby="explainModalTitle">
+  <div class="modal explain-modal">
+    <div class="modal-header">
+      <div><span class="ai-badge">✦ Plain-language explanation</span><h2 id="explainModalTitle">Term Explained</h2></div>
+      <button class="modal-close" onclick="closeExplainModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="explainModalBody"></div>
+  </div>
+</div>
+
+<!-- FTM Node -->
+<div class="modal-overlay" id="ftmModal" onclick="closeFTMModal(event)" role="dialog" aria-modal="true" aria-labelledby="ftmModalTitle">
+  <div class="modal ftm-modal">
+    <div class="modal-header">
+      <h2 id="ftmModalTitle">Fund Flow Stage</h2>
+      <button class="modal-close" onclick="closeFTMModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="ftmModalBody"></div>
+  </div>
+</div>
+
+<!-- RTI Helper -->
+<div class="modal-overlay" id="rtiModal" onclick="closeRTI(event)" role="dialog" aria-modal="true" aria-labelledby="rtiModalTitle">
+  <div class="modal rti-modal">
+    <div class="modal-header">
+      <div><span class="ai-badge">📬 RTI Draft Helper</span><h2 id="rtiModalTitle">Draft an RTI Request</h2></div>
+      <button class="modal-close" onclick="closeRTI()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="rtiModalBody"></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<!-- GLOSSARY PANEL -->
+<div class="glossary-overlay" id="glossaryOverlay" onclick="closeGlossary(event)">
+  <div class="glossary-panel" id="glossaryPanel" role="dialog" aria-modal="true" aria-label="Glossary">
+    <div class="glossary-header">
+      <div><h2>📖 Civic Glossary</h2><p class="section-sub">Plain-language explanations of common government terms.</p></div>
+      <button class="modal-close" onclick="closeGlossary()" aria-label="Close">×</button>
+    </div>
+    <div class="glossary-search-wrap">
+      <input type="text" id="glossarySearch" placeholder="Search terms…" oninput="filterGlossary()" autocomplete="off" />
+    </div>
+    <div class="glossary-body" id="glossaryBody"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
